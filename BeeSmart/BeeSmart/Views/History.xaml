@@ -1,0 +1,128 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:local1="clr-namespace:BeeSmart.Class"
+             Title="BeeHome"
+          BackgroundColor="White"
+             x:Class="BeeSmart.Views.History">
+    
+
+        
+        <StackLayout x:Name="layMain">
+            <StackLayout x:Name="l30"
+            Orientation="Vertical"
+             Margin="5,20,5,10"
+           VerticalOptions="Start"
+                            HorizontalOptions="FillAndExpand"
+                 >
+             <Grid   HorizontalOptions="FillAndExpand" VerticalOptions="StartAndExpand">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="70"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="50"/>
+                    <ColumnDefinition Width="50"/>
+                    </Grid.ColumnDefinitions>
+
+                    <ImageButton x:Name="btnAvatar" HeightRequest="50" VerticalOptions="Center" CornerRadius="5" BackgroundColor="White" HorizontalOptions="Center" Clicked="btnAvatar_Clicked" Source="bee">
+
+                    </ImageButton>
+                    <Label 
+                           Grid.Column="1"
+                            
+                            Text=""
+                                Margin="0,0,5,0"
+                       FontSize="26"
+                       
+                                TextColor="Gold"
+                
+                       x:Name="lbName"
+                       VerticalOptions="Center"
+                      HorizontalOptions="StartAndExpand"
+                        >
+
+                </Label>
+
+
+
+                    <StackLayout Grid.Column="2"  Orientation="Vertical">
+                        <ImageButton x:Name="btnLogOut" HeightRequest="30" VerticalOptions="Center" CornerRadius="5" BackgroundColor="White" HorizontalOptions="Center" Clicked="btnLogOut_Clicked" Source="logout">
+
+                        </ImageButton>
+                    <Label  FontSize="9"   VerticalOptions="Center" HorizontalOptions="Center">
+                            Logout
+                        </Label>
+                    </StackLayout>
+                <StackLayout Grid.Column="3"  Orientation="Vertical">
+                    <ImageButton x:Name="btnDelete" HeightRequest="30" VerticalOptions="Center" CornerRadius="5" BackgroundColor="White" HorizontalOptions="Center" Clicked="btnDelete_Clicked" Source="clear">
+
+                    </ImageButton>
+                    <Label FontSize="9"  VerticalOptions="Center" HorizontalOptions="Center">
+                        Xóa 
+                    </Label>
+                </StackLayout>
+                <StackLayout Grid.Column="4"  Orientation="Vertical">
+                        <ImageButton x:Name="btnAdd" HeightRequest="30" VerticalOptions="Center" CornerRadius="5" BackgroundColor="White" HorizontalOptions="Center" Clicked="btnAdd_Clicked" Source="plus">
+
+                        </ImageButton>
+                    <Label  FontSize="9"  VerticalOptions="Center" HorizontalOptions="Center">
+                            Thiết bị
+                        </Label>
+                    </StackLayout>
+                 
+
+                </Grid>
+
+    </StackLayout>
+
+        <ScrollView 
+                    Orientation="Vertical"
+                  VerticalOptions="StartAndExpand"
+                HorizontalOptions="FillAndExpand"
+                HorizontalScrollBarVisibility="Never"
+       
+                     >
+
+            <StackLayout>
+
+
+
+
+                <StackLayout Orientation="Horizontal" HorizontalOptions="Fill" VerticalOptions="Start" Margin="20,0,20,0">
+                    <Label VerticalOptions="Center" MinimumWidthRequest="30" HorizontalOptions="Start" >Nhà</Label>
+                    <ImageButton BackgroundColor="White" Clicked="Button_Clicked_1" HeightRequest="25" Source="plus" VerticalOptions="Center" HorizontalOptions="Start">
+                    </ImageButton>
+                    <ScrollView 
+                    Orientation="Horizontal"
+                    VerticalOptions="Fill"
+                    HorizontalOptions="StartAndExpand"
+                    HorizontalScrollBarVisibility="Never"
+                     >
+                        <Grid x:Name="gridItem"
+                         ColumnSpacing="0"
+                         RowSpacing="0"
+                         HorizontalOptions="FillAndExpand"
+                         VerticalOptions="FillAndExpand"
+                         >
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="50"></RowDefinition>
+                            </Grid.RowDefinitions>
+                        </Grid>
+                    </ScrollView>
+                
+                </StackLayout>
+
+
+                <StackLayout x:Name="stackBoard" Margin="10,0,10,0" Orientation="Vertical">
+
+                </StackLayout>
+
+                <StackLayout HeightRequest="100" />
+            </StackLayout>
+           
+        </ScrollView>
+
+
+    </StackLayout>
+  
+ 
+</ContentPage>

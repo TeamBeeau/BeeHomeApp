@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:PopupPage xmlns="http://xamarin.com/schemas/2014/forms"  
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"  
+             x:Class="BeeSmart.Views.Alarm"  
+             xmlns:pages="clr-namespace:Rg.Plugins.Popup.Pages;assembly=Rg.Plugins.Popup"  
+                 xmlns:animations="clr-namespace:Rg.Plugins.Popup.Animations;assembly=Rg.Plugins.Popup"  
+             BackgroundColor="Transparent">
+    <pages:PopupPage.Animation>
+        <animations:ScaleAnimation   
+                      PositionIn="Center"  
+                      PositionOut="Center"  
+                      ScaleIn="1.2"  
+                      ScaleOut="0.8"  
+                      DurationIn="300"  
+                      DurationOut="300"  
+                      EasingIn="SinOut"  
+                      EasingOut="SinIn"  
+            
+      HasBackgroundAnimation="True"/>
+    </pages:PopupPage.Animation>
+    <StackLayout   Padding="5,0" HorizontalOptions="FillAndExpand" VerticalOptions="Center"  Margin="10"  >
+        <Frame CornerRadius="5" Padding="0" HasShadow="True" BackgroundColor="#6e6e6e" VerticalOptions="Center" >
+            <StackLayout Padding="5">
+              
+                 
+                    <StackLayout>
+
+                    <Label x:Name="lbBoard" HorizontalOptions="Center" VerticalOptions="Start" FontFamily="Arial,36" Margin="5" FontAttributes="Bold" TextColor="White"> Đăng nhập</Label>
+                    <Grid x:Name="gridIO" HorizontalOptions="Center" VerticalOptions="Start">
+                        
+                    </Grid>
+                         <StackLayout Orientation="Horizontal" Margin="10,0,10,0">
+
+                            <Label HorizontalOptions="Start" VerticalOptions="Center"  TextColor="White" Text="Hẹn giờ Tắt">
+
+                            </Label>
+                            <Button   CornerRadius="10" Clicked="btnDelay_Clicked" x:Name="btnDelay"  HeightRequest="35" Margin="5,5,5,5" Text="OFF" FontAttributes="Bold" BackgroundColor="WhiteSmoke" HorizontalOptions="StartAndExpand" VerticalOptions="Center" >
+
+                            </Button>
+                        </StackLayout>
+                 
+
+                    <Frame x:Name="stackAlarm"   HasShadow="False" CornerRadius="2" BackgroundColor="	#999797"  Margin="10,0,10,0">
+
+                        <StackLayout >
+
+                            <Label HorizontalOptions="StartAndExpand" VerticalOptions="Center"  TextColor="White" Text=" Thời gian tắt|mở trong tuần" FontAttributes="Bold">
+
+                            </Label>
+                            <ScrollView   Orientation="Horizontal" VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Always">
+
+
+                                <Grid HorizontalOptions="Center" VerticalOptions="Start" ColumnSpacing="0">
+
+
+                                    <StackLayout Orientation="Horizontal" HorizontalOptions="Center" VerticalOptions="Fill">
+                                        <Button Grid.Column="0" CornerRadius="10" Clicked="btn2_Clicked" x:Name="btn2" WidthRequest="35" HeightRequest="35" Margin="2,0,2,0" FontAttributes="Bold"  BackgroundColor="WhiteSmoke"  Text="2" HorizontalOptions="Center" VerticalOptions="Center" >
+
+                                        </Button>
+                                        <Button Grid.Column="1"  CornerRadius="10" Clicked="btn3_Clicked" x:Name="btn3" WidthRequest="35" HeightRequest="35" Margin="2,0,2,0"  FontAttributes="Bold" BackgroundColor="WhiteSmoke"   Text="3" HorizontalOptions="Center" VerticalOptions="Center" >
+
+                                        </Button>
+                                        <Button Grid.Column="2"  CornerRadius="10" Clicked="btn4_Clicked" x:Name="btn4" WidthRequest="35" HeightRequest="35" Margin="2,0,2,0"   FontAttributes="Bold" BackgroundColor="WhiteSmoke"     Text="4" HorizontalOptions="Center" VerticalOptions="Center" >
+
+                                        </Button>
+                                        <Button Grid.Column="3"  CornerRadius="10" Clicked="btn5_Clicked" x:Name="btn5" WidthRequest="35" HeightRequest="35" Margin="2,0,2,0"  FontAttributes="Bold" BackgroundColor="WhiteSmoke"   Text="5" HorizontalOptions="Center" VerticalOptions="Center" >
+
+                                        </Button>
+                                        <Button Grid.Column="4"  CornerRadius="10"  Clicked="btn6_Clicked" x:Name="btn6" WidthRequest="35" HeightRequest="35" Margin="2,0,2,0"  FontAttributes="Bold" BackgroundColor="WhiteSmoke"   Text="6" HorizontalOptions="Center" VerticalOptions="Center" >
+
+                                        </Button>
+                                        <Button Grid.Column="5"  CornerRadius="10" Clicked="btn7_Clicked" x:Name="btn7" WidthRequest="35" HeightRequest="35" Margin="2,0,2,0"   FontAttributes="Bold" BackgroundColor="WhiteSmoke"   Text="7" HorizontalOptions="Center" VerticalOptions="Center" >
+
+                                        </Button>
+                                        <Button Grid.Column="6"  CornerRadius="10"  Clicked="btn8_Clicked" x:Name="btn8"  WidthRequest="35" HeightRequest="35" Margin="2,0,2,0"   FontAttributes="Bold" BackgroundColor="WhiteSmoke" TextColor="Red"  Text="C" HorizontalOptions="Center" VerticalOptions="Center" >
+
+                                        </Button>
+                                    </StackLayout>
+                                </Grid>
+                            </ScrollView>
+                            <StackLayout Orientation="Horizontal">
+                                <Label HorizontalOptions="Start" VerticalOptions="Center"  TextColor="White" Text="Giờ mở">
+
+                                </Label>
+                                <TimePicker    HorizontalOptions="Start"  VerticalOptions="Center" x:Name="dateOn" Format="HH:mm" TextColor="Black">
+
+                                </TimePicker>
+                                <Label HorizontalOptions="EndAndExpand" VerticalOptions="Center" Margin="10,0,0,0"  TextColor="White" Text="Giờ tắt">
+
+                                </Label>
+                                <TimePicker HorizontalOptions="End"   VerticalOptions="Center" x:Name="dateOFF" Format="HH:mm" TextColor="Red">
+
+                                </TimePicker>
+
+                                <ImageButton x:Name="btnPlusOn" Margin="5,15,5,15" Clicked="btnPlusOn_Clicked" Source="plus" HorizontalOptions="End" HeightRequest="25"  BackgroundColor="White">
+
+                                </ImageButton>
+                            </StackLayout>
+                            <StackLayout Orientation="Horizontal">
+                                <ScrollView   MinimumHeightRequest="50" VerticalOptions="Center" HorizontalOptions="Fill" Orientation="Horizontal" VerticalScrollBarVisibility="Never" HorizontalScrollBarVisibility="Always">
+
+                                    <Grid  x:Name="gridOn" VerticalOptions="Center">
+
+                                    </Grid>
+                                </ScrollView>
+                            </StackLayout>
+                           
+
+
+
+                        </StackLayout>
+                    </Frame>
+                    <Button x:Name="btnApply" Text="Thay đổi" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" HeightRequest="40" BackgroundColor="	#c3c3c3" TextColor="White" Margin="10,0,10,10" Clicked="btnApply_Clicked">
+                        
+                    </Button>
+                   
+            
+                       
+                  </StackLayout>
+              
+            </StackLayout>
+        </Frame>
+    </StackLayout>
+</pages:PopupPage>

@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<pages:PopupPage xmlns="http://xamarin.com/schemas/2014/forms"  
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"  
+             x:Class="BeeSmart.Views.PlayLink"  
+             xmlns:pages="clr-namespace:Rg.Plugins.Popup.Pages;assembly=Rg.Plugins.Popup"  
+                 xmlns:animations="clr-namespace:Rg.Plugins.Popup.Animations;assembly=Rg.Plugins.Popup"  
+             BackgroundColor="Transparent">
+    <pages:PopupPage.Animation>
+        <animations:ScaleAnimation   
+                      PositionIn="Center"  
+                      PositionOut="Center"  
+                      ScaleIn="1.2"  
+                      ScaleOut="0.8"  
+                      DurationIn="300"  
+                      DurationOut="300"  
+                      EasingIn="SinOut"  
+                      EasingOut="SinIn"  
+      HasBackgroundAnimation="True"/>
+    </pages:PopupPage.Animation>
+    <StackLayout   Padding="5,0" HorizontalOptions="FillAndExpand" VerticalOptions="Center"  Margin="10"  >
+        <Frame CornerRadius="5" Padding="0" HasShadow="True" BackgroundColor="#f9d667" VerticalOptions="Center" >
+            <StackLayout Padding="5">
+              
+                 
+                    <StackLayout>
+
+                 
+                        <StackLayout x:Name="layoutFrame" MinimumHeightRequest="150" Orientation="Vertical" VerticalOptions="Center" HorizontalOptions="Fill">
+                            <StackLayout Orientation="Horizontal">
+                            <Label VerticalOptions="Center" HorizontalOptions="Start"  FontSize="12" > Hostname </Label>
+                            <Editor x:Name="editHost" BackgroundColor="#e0c05c" HorizontalOptions="Fill" Text="sensor.hungphuthai.vn" TextColor="White">  </Editor>
+                            <Label VerticalOptions="Center" HorizontalOptions="EndAndExpand"  FontSize="12" >Port</Label>
+                            <Editor x:Name="editPort" BackgroundColor="#e0c05c" HorizontalOptions="End"  MinimumWidthRequest="150" Text="1443" Keyboard="Numeric"  TextColor="White"></Editor>
+                            </StackLayout>
+                            <StackLayout Orientation="Horizontal">
+                            <Label VerticalOptions="Center" HorizontalOptions="StartAndExpand">Database</Label>
+                            <Editor x:Name="editData" BackgroundColor="#e0c05c" HorizontalOptions="FillAndExpand" Text="HPTSENSORTHUDUC" TextColor="White"></Editor>
+                            </StackLayout>
+                            <StackLayout Orientation="Horizontal">
+                            <Label VerticalOptions="Center" HorizontalOptions="StartAndExpand">User</Label>
+                            <Editor x:Name="editUser" BackgroundColor="#e0c05c" HorizontalOptions="StartAndExpand" Text="SENSOR" TextColor="White"></Editor>
+                            <Label VerticalOptions="Center" HorizontalOptions="StartAndExpand">Password</Label>
+                            <Editor x:Name="editPass" BackgroundColor="#e0c05c" HorizontalOptions="FillAndExpand" Text="HPT@232316#" TextColor="White"></Editor>
+                            </StackLayout>
+
+                        </StackLayout>
+                    <Button x:Name="btnConnect" Text="Connect" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" HeightRequest="40" BackgroundColor="WhiteSmoke" Margin="15" Clicked="btnConnect_Clicked">
+                        
+                    </Button>
+                   
+            
+                       
+                  </StackLayout>
+              
+            </StackLayout>
+        </Frame>
+    </StackLayout>
+</pages:PopupPage>

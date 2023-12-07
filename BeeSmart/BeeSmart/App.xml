@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Application.Resources>
+	<ResourceDictionary>
+		<Style TargetType="Label" Key="TitleStyle">
+			<Setter Property="TextColor" Value="WhiteSmoke" />
+			<Setter Property="FontSize" Value="Medium" />
+			<Setter Property="HorizontalTextAlignment" Value="Center" />
+		</Style>
+	
+	</ResourceDictionary>
+</Application.Resources>
