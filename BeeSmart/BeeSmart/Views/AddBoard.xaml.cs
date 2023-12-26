@@ -32,7 +32,7 @@ namespace BeeSmart.Views
         public AddBoard()
         {
             InitializeComponent();
-            web.Source = "http://192.168.4.1/user=" + G.User;
+            web.Source = "http://192.168.4.1/user=" + G.User + ";";
             App.Resumed += App_Resumed;
         
         }
