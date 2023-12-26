@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" package="com.beeauhome" android:installLocation="auto" android:versionName="Beta">
 	<uses-sdk android:minSdkVersion="28" android:targetSdkVersion="31" />
-	<application android:label="BeeHome" android:icon="@drawable/bee60" android:usesCleartextTraffic="true" android:networkSecurityConfig="@xml/network_security_config"></application>
+	<application android:label="BeeHome" android:usesCleartextTraffic="true" android:networkSecurityConfig="@xml/network_security_config" android:icon="@drawable/bee60"></application>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.INTERNET" />

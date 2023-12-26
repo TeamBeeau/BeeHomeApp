@@ -683,6 +683,7 @@ namespace BeeSmart.Views
                         if (type.Contains("key"))
                         {
                             cl = Color.FromHex("#f9d667");
+                            if (gpio.state == 0) gpio.state = 1;
                             type += gpio.state;
                         }
                         else
@@ -886,6 +887,7 @@ namespace BeeSmart.Views
                 {
                     if (type.Trim().Contains("key"))
                     {
+                        if (state == 0) state = 1;
                         btnGPIO.Source = "key" + state;
                     }
                     else
@@ -1050,6 +1052,7 @@ namespace BeeSmart.Views
 
                                 if (board.GPIOs[i].type.Contains("key"))
                                 {
+                                    if (state == 0) state = 1;
                                     listBtnGPIOs[index].btnGPIO.Source = "key" + state;
                                 }
                                 else
@@ -1270,8 +1273,8 @@ namespace BeeSmart.Views
             if (nativeHelper != null)
             {
 
-              //bool IsConnect=  await nativeHelper.ConnectToWifi("BeeHome", "");
-                //if(IsConnect)
+              bool IsConnect=  await nativeHelper.ConnectToWifi("BeeHome", "");
+                if(IsConnect)
                 DisplayAlert("Wifi", "Đã kết nối thành công!", "OK");
 
             }
