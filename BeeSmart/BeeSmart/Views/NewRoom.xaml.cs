@@ -100,7 +100,8 @@ namespace BeeSmart.Views
         private static readonly HttpClient client = new HttpClient();
         private async void btnLogin_Clicked(object sender, EventArgs e)
         {
-            var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=InsertRoom&name=" + editRoom.Text.Trim() + "&users="+ G.User );
+            //var response = await client.GetAsync("https://giacongpcb.vn/beehome/action.php?action=InsertRoom&name=" + editRoom.Text.Trim() + "&users="+ G.User );
+            var response = await client.GetAsync("http://giacongpcb.vn/beehome/action.php?action=InsertRoom&name=" + editRoom.Text.Trim() + "&users="+ G.User );
 
             var responseString = await response.Content.ReadAsStringAsync();
             if(responseString.Length>0)

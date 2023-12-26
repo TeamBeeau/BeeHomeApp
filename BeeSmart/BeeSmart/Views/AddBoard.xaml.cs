@@ -32,6 +32,7 @@ namespace BeeSmart.Views
         public AddBoard()
         {
             InitializeComponent();
+            web.Source = "http://192.168.4.1/user=" + G.User;
             App.Resumed += App_Resumed;
         
         }
@@ -77,17 +78,45 @@ namespace BeeSmart.Views
             // String listnameBoard = G.listBoardRoom.Trim() + "_" + editName.Text;
 
             //  listnameBoard = listnameBoard.Replace("__", "_");
-            var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=getTypeMac&board=" + editMac.Text);
+            //var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=getTypeMac&board=" + editMac.Text);
+            var response = await client.GetAsync("https://giacongpcb.vn/beehome/action.php?action=get_boardNew&users=" + G.User);
             var responseString = await response.Content.ReadAsStringAsync();
+            responseString = responseString.Replace("\"", "");
+            responseString = responseString.Replace("{", "");
+            responseString = responseString.Replace("}", "");
+            String[] S3 = responseString.Split(':');
+            String nMac = "";
+            String nType = "";
+            String defname = "";
+            if (responseString.Length > 8 && S3.Length >= 3)
+            {
+                nMac = S3[0];
+                nType = S3[1];
+                defname = S3[2];
+            }
+            else
+            {
+                await DisplayAlert("Error", "Không tìm thấy thiết bị", "OK");
+                return;
+            }
+            foreach (Button btn in G.history.btnsHome)
+            {
+                if (btn.TextColor != Color.Gray)
+                {
+                    G.nameRoom = btn.Text;
+                }
+            }
             String url = "";
-            if (responseString.Contains("F1"))
+            /*if (responseString.Contains("F1"))
             {
                 url = "https://giacongpcb.vn/esp-outputs-action.php?action=InsertFan1&name=" + editName.Text + "&board=" + editMac.Text + "&users=" + G.User + "&home=" + G.nameRoom;
             }
             else
             {
                 url = "https://giacongpcb.vn/esp-outputs-action.php?action=InsertNewBoard&name=" + editName.Text + "&board=" + editMac.Text + "&users=" + G.User + "&home=" + G.nameRoom;
-            }
+                
+            }*/
+            url = "https://giacongpcb.vn/beehome/action.php?action=InsertNewBoard&name=" + editName.Text + "&board=" + nMac + "&users=" + G.User + "&home=" + G.nameRoom + "&type=" + nType + "&defname=" + defname;
             response = await client.GetAsync(url);
             responseString = await response.Content.ReadAsStringAsync();
             if (responseString.Length > 0)
@@ -98,7 +127,8 @@ namespace BeeSmart.Views
             }
             else
             {
-                await DisplayAlert("Error", "Trùng tên Board", "OK");
+                //await DisplayAlert("Error", "Trùng tên Board", "OK");
+                await DisplayAlert("Error", "Trùng tên Device", "OK");
             }
         }
 

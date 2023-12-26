@@ -108,7 +108,7 @@ namespace BeeSmart.Views
                     await DisplayAlert("Register", "Mật khẩu không trùng khớp", "OK");
                     return;
                 }    
-                var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=register&Name=" + editUser.Text + "&Pass=" + editPass.Text);
+                var response = await client.GetAsync("https://giacongpcb.vn/beehome/action.php?action=register&Name=" + editUser.Text + "&Pass=" + editPass.Text);
 
                 var responseString = await response.Content.ReadAsStringAsync();
                 if (responseString.Length > 0)
@@ -136,7 +136,7 @@ namespace BeeSmart.Views
             }
             else
             {
-                var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=login&name=" + editUser.Text + "&pass=" + editPass.Text);
+                var response = await client.GetAsync("https://giacongpcb.vn/beehome/action.php?action=login&name=" + editUser.Text + "&pass=" + editPass.Text);
 
                 var responseString = await response.Content.ReadAsStringAsync();
                 if (responseString != "null")

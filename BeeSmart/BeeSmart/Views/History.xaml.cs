@@ -21,6 +21,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -129,19 +130,20 @@ namespace BeeSmart.Views
 
                 {
 
-                    var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=getBoardTime&name=" + board.name + "&users=" + G.User);
+                    //var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=getBoardTime&name=" + board.name + "&users=" + G.User);
+                    var response = await client.GetAsync("http://giacongpcb.vn/beehome/action.php?action=getLastRequest&board=" + board.Mac + "&users=" + G.User);
                     responseString = await response.Content.ReadAsStringAsync();
                     if (responseString.Length < 10) return;
                     responseString = responseString.Replace("\"", "");
                     responseString = responseString.Replace("{", "");
                     responseString = responseString.Replace("}", "");
 
-                    String[] S4 = responseString.Split(':');
-                    if (S4.Count() <= 0) return;
-                    String sTimer = responseString.Replace(S4[0]+":", "");
-                   
-                       
-                        DateTime lastTime = DateTime.Parse(sTimer);
+                    //String[] S4 = responseString.Split(':');
+                    //if (S4.Count() <= 0) return;
+                    //String sTimer = responseString.Replace(S4[0]+":", "");
+                    String sTimer = responseString;
+
+                    DateTime lastTime = DateTime.Parse(sTimer);
                         board.lastTime =  lastTime;
                     TimeSpan timeSpan = DateTime.Now - board.lastTime;
                     if(timeSpan.TotalSeconds>5)
@@ -296,7 +298,7 @@ namespace BeeSmart.Views
         DataTable dtStatus;
         private static HttpClient client = new HttpClient();
         String responseString;
-        List<Button> btnsHome = new List<Button>();
+        public List<Button> btnsHome = new List<Button>();
         List<ListBtnGPIO> listBtnGPIOs = new List<ListBtnGPIO>();
 
     
@@ -304,8 +306,14 @@ namespace BeeSmart.Views
         {
             try
             {
+                /*
+                 * https://giacongpcb.vn/beehome/action.php?
+                    C4_5B_BE_54_BB_EB
+                    "{Cửa Xưởng:D1,Phòng Lab:O4,Quạt:F1,Ổ cắm:O3}"
+                    "{O1:0,Mở cửa:0,Dừng:1,Đóng cửa:0}"
+                 * */
                 //    var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=getBoardUser&users=" + G.User);
-                var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=getHome&users=" + G.User);
+                var response = await client.GetAsync("https://giacongpcb.vn/beehome/action.php?action=getHome&users=" + G.User);
 
 
                 var responseString = await response.Content.ReadAsStringAsync();
@@ -324,14 +332,40 @@ namespace BeeSmart.Views
                     try
                     {
                         List<Board> boards = new List<Board>();
-                        response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=getBoardRoom&home=" + G.nameRoom + "&users=" + G.User);
+                        response = await client.GetAsync("https://giacongpcb.vn/beehome/action.php?action=getBoardRoom&home=" + G.nameRoom + "&users=" + G.User);
+                        //response = await client.GetAsync("https://giacongpcb.vn/beehome/action.php?action=getBoardRoom&home=" + "Office" + "&users=" + "beeau.vn");
                         responseString = await response.Content.ReadAsStringAsync();
 
                         responseString = responseString.Replace("\"", "");
                         responseString = responseString.Replace("{", "");
                         responseString = responseString.Replace("}", "");
+                        //Ổ cấm:C4_5B_BE_55_8A_C3:o cam 1; o cam 2; o cam 3;:O3,bee home:C8_C9_A3_8B_C0_4A:o cam 1; o cam 2; o cam 3;:O3
                         String[] S5 = responseString.Split(',');
-
+                        
+                        foreach (String s6 in S5)
+                        {
+                            String[] sp3 = s6.Split(':');
+                            String board = sp3[0];
+                            String typeBoard = sp3[3];
+                            String _Mac = sp3[1];
+                            if (board.Trim() == "") continue;
+                            List<GPIO> gpios = new List<GPIO>();
+                            String[] S4 = sp3[2].Split(';');
+                            response = await client.GetAsync("http://giacongpcb.vn/beehome/action.php?action=getControlsStates&board=" + _Mac + "&users=" + G.User);
+                            responseString = await response.Content.ReadAsStringAsync();
+                            responseString = responseString.Replace("\"", "");
+                            responseString = responseString.Replace("{", "");
+                            responseString = responseString.Replace("}", "");
+                            String[] S8 = responseString.Split(';');
+                            if (S8.Length != S4.Length) continue;
+                            for (int i = 0; i < S4.Length; i++)
+                            {
+                                if (S4[i] == "" || string.IsNullOrEmpty(S8[i])) continue;
+                                gpios.Add(new GPIO(S4[i], Convert.ToInt32(S8[i]), _Mac, i));
+                            }
+                            boards.Add(new Board(board,_Mac, typeBoard, gpios));
+                        }
+                        /*
                         foreach (String s6 in S5)
                         {
                             String[] sp3 = s6.Split(':');
@@ -357,7 +391,7 @@ namespace BeeSmart.Views
 
                             boards.Add(new Board(board, typeBoard, gpios));
 
-                        }
+                        }*/
                         G.listHome.Add(new Home(sBoard[0], boards));
                     }
                     catch(Exception ex)
@@ -443,7 +477,7 @@ namespace BeeSmart.Views
                       HorizontalOptions = LayoutOptions.Start,
                       VerticalOptions = LayoutOptions.Center,
                       BackgroundColor= Color.FromHex("#f2f2f2"),
-                  };
+                    };
 
                   /*  Label lb = new Label
                     {
@@ -587,13 +621,22 @@ namespace BeeSmart.Views
                     girdGPIO.RowDefinitions.Add(row);
                    
                     int col2 = 0;
-                    List<GPIO> gpios = new List<GPIO>();
-                    var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=getBoardStates&nameBoard=" + board.name + "&users=" + G.User);
+                    //List<GPIO> gpios = new List<GPIO>();
+                    List<GPIO> gpios = board.GPIOs.ToList();
+                    //var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=getBoardStates&nameBoard=" + board.name + "&users=" + G.User);
+                    var response = await client.GetAsync("http://giacongpcb.vn/beehome/action.php?action=getControlsStates&board=" + board.Mac + "&users=" + G.User);
                     responseString = await response.Content.ReadAsStringAsync();
 
                     responseString = responseString.Replace("\"", "");
                     responseString = responseString.Replace("{", "");
                     responseString = responseString.Replace("}", "");
+                    String[] S4 = responseString.Split(';');
+                    for (int i =0;i < S4.Length; i++)
+                    {
+                        if (S4[i] == "") continue;
+                        gpios[i].state = Convert.ToInt32(S4[i]);
+                    }
+                    /*
                     String[] S4 = responseString.Split(',');
 
                     foreach (String s2 in S4)
@@ -603,13 +646,21 @@ namespace BeeSmart.Views
                         if (s3.Count() < 2) continue;
                         gpios.Add(new GPIO(s3[0], Convert.ToInt32(s3[1])));
                     }
-                    response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=getTypeBoard&nameBoard=" + board.name + "&users=" + G.User);
+                    */
+
+                    response = await client.GetAsync("http://giacongpcb.vn/beehome/action.php?action=getTypeBoard&board=" + board.Mac + "&users=" + G.User);
                     responseString = await response.Content.ReadAsStringAsync();
 
                     responseString = responseString.Replace("\"", "");
                     responseString = responseString.Replace("{", "");
                     responseString = responseString.Replace("}", "");
-                    String[] S5 = responseString.Split(',');
+                    String[] S5 = responseString.Split(';');
+                    for (int j = 0;j < S5.Length;j++)
+                    {
+                        if (S5[j] == "") continue;
+                        gpios[j].type = S5[j];
+                    }
+                    /*
                     foreach (String s2 in S5)
                     {
                         if (s2 == "") continue;
@@ -620,6 +671,7 @@ namespace BeeSmart.Views
                         gpios[gpios.FindIndex(a => a.name == name)].type = type;
 
                     }
+                    */
                     board.GPIOs = gpios;
                   
 
@@ -678,7 +730,7 @@ namespace BeeSmart.Views
                         };
                         stk2.Children.Add(imgBtn);
                         stk2.Children.Add(Label);
-                        listBtnGPIOs.Add(new ListBtnGPIO(board.name, gpio.name, imgBtn));
+                        listBtnGPIOs.Add(new ListBtnGPIO(board.Mac,board.name, gpio.name, imgBtn));
 
                         Grid.SetRow(stk2, 0);
                         Grid.SetColumn(stk2, col2);
@@ -708,6 +760,7 @@ namespace BeeSmart.Views
             catch(Exception ex) { }
         }
         Alarm Alarm;
+        public Task taskAlarm;
         private async void AlarmSwipeItem_Invoked(object sender, EventArgs e)
         {
             G.IsInternet = CheckNet();
@@ -716,7 +769,8 @@ namespace BeeSmart.Views
             int index = listBtnAlarm.FindIndex(a => a == button);
             G.boardSelect = G.listHome[G.indexHome].board[index];
             if (Alarm == null) Alarm = new Alarm();
-            await PopupNavigation.PushAsync(Alarm);
+            taskAlarm = PopupNavigation.PushAsync(Alarm);
+            await taskAlarm;
         }
 
         private async void BtnDeleteBoard_Clicked(object sender, EventArgs e)
@@ -726,11 +780,18 @@ namespace BeeSmart.Views
             G.boardSelect = G.listHome[G.indexHome].board[index];
            
             String listboard = "";
-           
+            foreach (Button btn in G.history.btnsHome)
+            {
+                if (btn.TextColor != Color.Gray)
+                {
+                    G.nameRoom = btn.Text;
+                }
+            }
             var choice = await DisplayAlert("Xóa", "Bạn muốn xóa Thiết bị  " + G.boardSelect.name+ " ?", "YES", "NO");
             if (choice)
             {
-                var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=deleteBoard&home=" + G.nameRoom + "&users=" + G.User+ "&nameBoard=" + G.boardSelect.name);
+                //var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=deleteBoard&home=" + G.nameRoom + "&users=" + G.User+ "&board=" + G.boardSelect.Mac);
+                var response = await client.GetAsync("http://giacongpcb.vn/beehome/action.php?action=deleteBoard" + "&users=" + G.User+ "&board=" + G.boardSelect.Mac);
 
                 var responseString = await response.Content.ReadAsStringAsync();
                 if (responseString.Length > 0)
@@ -785,10 +846,11 @@ namespace BeeSmart.Views
         String sSendBlink; int indexGPIO; int indexBoard; ImageButton btnGPIO;
         bool IsStopDoor = false;
         GPIO gpioDoor;
-        private async void PressGPIO(String nameBoard,GPIO gpio)
+        private async void PressGPIO(String nameBoard, List<GPIO> gpios, int idx)//output IO
         {
             try
             {
+                GPIO gpio = gpios[idx];
                 if (!G.listHome[G.indexHome].board[indexBoard].IsOnline) return;
                 int state = gpio.state;
                 string type = gpio.type;
@@ -807,7 +869,15 @@ namespace BeeSmart.Views
                     if (type.Trim().Contains("door") || type.Trim().Contains("click")) state = 1;
                     if (type.Trim().Contains("nc")) state = 0;
                 }
-                string s = "https://giacongpcb.vn/esp-outputs-action.php?action=output_status2&name=" + gpio.name + "&board=" + nameBoard + "&users=" + G.User + "&state=" + state;
+                gpio.state = state;
+                gpios[idx].state = state;
+                string states = "";
+                for (int i = 0; i < gpios.Count; i++)
+                {
+                    states += gpios[i].state.ToString() + ";";
+                }
+                //string s = "https://giacongpcb.vn/esp-outputs-action.php?action=output_status2&name=" + gpio.name + "&board=" + nameBoard + "&users=" + G.User + "&state=" + state;
+                string s = "http://giacongpcb.vn/beehome/action.php?action=set_Controls&board=" + gpio.Mac + "&States=" + states + "&Delays=0;0;0;&users=" + G.User;
                 var response = await client.GetAsync(s);
 
 
@@ -835,7 +905,15 @@ namespace BeeSmart.Views
 
                     if (type.Trim().Contains("door") || type.Trim().Contains("click"))
                     {
-                        sSendBlink = "https://giacongpcb.vn/esp-outputs-action.php?action=output_status2&name=" + gpio.name + "&board=" + nameBoard + "&users=" + G.User + "&state=" + 0;
+                        gpio.state = 0;
+                        gpios[idx].state = 0;
+                        states = "";
+                        for (int i = 0; i < gpios.Count; i++)
+                        {
+                            states += gpios[i].state.ToString() + ";";
+                        }
+                        //sSendBlink = "https://giacongpcb.vn/esp-outputs-action.php?action=output_status2&name=" + gpio.name + "&board=" + nameBoard + "&users=" + G.User + "&state=" + 0;
+                        sSendBlink = "http://giacongpcb.vn/beehome/action.php?action=set_Controls&board=" + gpio.Mac + "&States=" + states + "&Delays=0;0;0;&users=" + G.User;
 
                         Device.StartTimer(TimeSpan.FromMilliseconds(200), () =>
                         {
@@ -853,7 +931,16 @@ namespace BeeSmart.Views
 
                     else if (type.Trim().Contains("nc"))
                     {
-                        sSendBlink = "https://giacongpcb.vn/esp-outputs-action.php?action=output_status2&name=" + gpio.name + "&board=" + nameBoard + "&users=" + G.User + "&state=" + 1;
+                        gpio.state = 1;
+                        gpios[idx].state = 1;
+                        states = "";
+                        for (int i = 0; i < gpios.Count; i++)
+                        {
+                            states += gpios[i].state.ToString() + ";";
+                        }
+                        //sSendBlink = "https://giacongpcb.vn/esp-outputs-action.php?action=output_status2&name=" + gpio.name + "&board=" + nameBoard + "&users=" + G.User + "&state=" + 1;
+                        sSendBlink = "http://giacongpcb.vn/beehome/action.php?action=set_Controls&board=" + gpio.Mac + "&States=" + states + "&Delays=0;0;0;&users=" + G.User;
+
 
                         Device.StartTimer(TimeSpan.FromMilliseconds(200), () =>
                         {
@@ -905,7 +992,7 @@ namespace BeeSmart.Views
                     if (G.IsInternet)
                     {
                         IsPressed = true; tmOut.Enabled = true;
-                        PressGPIO(nameBoard, gpio);
+                        PressGPIO(nameBoard, gpios, indexGPIO);
                     }
                        
                     else 
@@ -921,7 +1008,7 @@ namespace BeeSmart.Views
            else
             {
                 IsPressed = true; tmOut.Enabled = true;
-                PressGPIO(nameBoard, gpio);
+                PressGPIO(nameBoard, gpios, indexGPIO);
             }    
            
 
@@ -940,24 +1027,63 @@ namespace BeeSmart.Views
                 
                 {
                     if (!board.IsOnline) continue;
-              
-                    var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=getBoardStates&nameBoard=" + board.name + "&users=" + G.User);
+
+                    //var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=getBoardStates&nameBoard=" + board.name + "&users=" + G.User);
+                    var response = await client.GetAsync("http://giacongpcb.vn/beehome/action.php?action=getControlsStates&board=" + board.Mac + "&users=" + G.User);
                     responseString = await response.Content.ReadAsStringAsync();
 
                     responseString = responseString.Replace("\"", "");
                     responseString = responseString.Replace("{", "");
                     responseString = responseString.Replace("}", "");
-                    String[] S4 = responseString.Split(',');
+                    String[] S4 = responseString.Split(';');
+
+                    for (int i = 0; i < S4.Length; i++)
+                    {
+                        if (S4[i] == "") continue;
+                        int state = Convert.ToInt32(S4[i]);
+                        if (board.GPIOs[i].state != state)
+                        {
+                            board.GPIOs[i].state = state;
+                            int index = listBtnGPIOs.FindIndex(a => a.Mac == board.Mac && a.GPIO == board.GPIOs[i].name);
+                            if (index > -1)
+                            {
+
+                                if (board.GPIOs[i].type.Contains("key"))
+                                {
+                                    listBtnGPIOs[index].btnGPIO.Source = "key" + state;
+                                }
+                                else
+                                {
+                                    switch (state)
+                                    {
+
+                                        case 0:
+                                            listBtnGPIOs[index].btnGPIO.BackgroundColor = Color.FromRgb(220, 220, 220);
+                                            break;
+                                        case 1:
+                                            listBtnGPIOs[index].btnGPIO.BackgroundColor = Color.FromHex("#f9d667");
+                                            break;
+                                    }
+                                }
+                            }
+
+                        }
+
+
+
+                    }
+
+                    /*
                     foreach (String s2 in S4)
                     {
                         if (s2 == "") continue;
                         String[] s3 = s2.Split(':');
                         if (s3.Count() < 2) continue;
-                   int indexGPIO= board.GPIOs.FindIndex(a=>a.name.Contains(s3[0]));
-                    if(indexGPIO>-1)
+                        int indexGPIO = board.GPIOs.FindIndex(a => a.name.Contains(s3[0]));
+                        if (indexGPIO > -1)
                         {
                             int state = Convert.ToInt32(s3[1]);
-                         if(board.GPIOs[indexGPIO].state!= state)
+                            if (board.GPIOs[indexGPIO].state != state)
                             {
                                 board.GPIOs[indexGPIO].state = state;
                                 int index = listBtnGPIOs.FindIndex(a => a.nameBoard == board.name && a.GPIO == board.GPIOs[indexGPIO].name);
@@ -982,13 +1108,13 @@ namespace BeeSmart.Views
                                         }
                                     }
                                 }
-                                   
-                                }
-                            
-                        }    
-                     
+
+                            }
+
+                        }
+
                     }
-                   
+                   */
                 }
             }
             catch (Exception ex)
@@ -1041,7 +1167,7 @@ namespace BeeSmart.Views
                     }
                     else
                     {
-                        var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=login&name=" + G.User + "&pass=" + G.Pass);
+                        var response = await client.GetAsync("https://giacongpcb.vn/beehome/action.php?action=login&name=" + G.User + "&pass=" + G.Pass);
 
                         var responseString = await response.Content.ReadAsStringAsync();
                         if (responseString != "null")
@@ -1144,15 +1270,15 @@ namespace BeeSmart.Views
             if (nativeHelper != null)
             {
 
-              bool IsConnect=  await nativeHelper.ConnectToWifi("Bee5G","beeau$beeau");
-                if(IsConnect)
+              //bool IsConnect=  await nativeHelper.ConnectToWifi("BeeHome", "");
+                //if(IsConnect)
                 DisplayAlert("Wifi", "Đã kết nối thành công!", "OK");
 
             }
             if (AddBoard == null)
                 AddBoard = new AddBoard();
             await PopupNavigation.PushAsync(AddBoard);
-            /* var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=getBoardNone");
+            /* var response = await client.GetAsync("https://giacongpcb.vn/beehome/action.php?action=getBoardNone");
 
 
              G.sBoardNone = await response.Content.ReadAsStringAsync();
@@ -1173,12 +1299,22 @@ namespace BeeSmart.Views
         {
             G.IsInternet = CheckNet();
             if (!G.IsInternet) return;
-            var choice = await DisplayAlert("LogOut", "Bạn muốn tất cả dữ liệu " + G.nameRoom + " ?", "YES", "NO");
+            foreach (Button btn in G.history.btnsHome)
+            {
+                if (btn.TextColor != Color.Gray)
+                {
+                    G.nameRoom = btn.Text;
+                }
+            }
+            //var choice = await DisplayAlert("LogOut", "Bạn muốn tất cả dữ liệu " + G.nameRoom + " ?", "YES", "NO");
+            var choice = await DisplayAlert("Xoá", "Bạn muốn tất cả dữ liệu " + G.nameRoom + " ?", "YES", "NO");
             if (choice)
             {
                 try
                 {
-                    var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=deleteRoom&home=" + G.nameRoom + "&users=" + G.User);
+                    //String sss = "https://giacongpcb.vn/beehome/action.php?action=deleteRoom&home=" + G.nameRoom + "&users=" + G.User;
+                    //https://giacongpcb.vn/beehome/action.php?action=deleteRoom&home=test 02&users=test
+                    var response = await client.GetAsync("https://giacongpcb.vn/beehome/action.php?action=deleteRoom&home=" + G.nameRoom + "&users=" + G.User);
 
                     var responseString = await response.Content.ReadAsStringAsync();
                     if (responseString.Length > 0)

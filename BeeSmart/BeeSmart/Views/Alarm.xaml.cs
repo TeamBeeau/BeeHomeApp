@@ -16,8 +16,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using System.Windows.Input;
 using Xamarin.Essentials;
 using Xamarin.Forms;
+using Xamarin.Forms.PlatformConfiguration;
 using Xamarin.Forms.Xaml;
 using Timer = System.Timers.Timer;
 
@@ -93,13 +95,20 @@ namespace BeeSmart.Views
         {
             dateOn.Time = new TimeSpan(DateTime.Now.Hour, DateTime.Now.Minute,0);
             dateOFF.Time = new TimeSpan(DateTime.Now.Hour, DateTime.Now.Minute, 0);
-            var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=getDelay2&nameBoard=" + G.boardSelect.name + "&name=" + name);
+            //var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=getDelay2&nameBoard=" + G.boardSelect.name + "&name=" + name);
+            var response = await client.GetAsync("http://giacongpcb.vn/beehome/action.php?action=getControlsDelays&board=" + G.boardSelect.Mac + "&users=" + G.User);
             string responseString = await response.Content.ReadAsStringAsync();
             responseString = responseString.Replace("\"", "");
             responseString = responseString.Replace("{", "");
             responseString = responseString.Replace("}", "");
-            String[] spDelay = responseString.Split(':');
-            iDelay = Convert.ToInt32( spDelay[1]);
+            String[] spDelay = responseString.Split(';');
+            iDelay = 0;
+            try
+            {
+                iDelay = Convert.ToInt32(spDelay[gpioSelect.idx]);
+            }
+            catch { }
+            gpioSelect.iDelay = iDelay;
             if (iDelay == 0)
             {
                 btnDelay.BackgroundColor = Color.WhiteSmoke; btnDelay.Text = "OFF";
@@ -110,6 +119,10 @@ namespace BeeSmart.Views
                 btnDelay.BackgroundColor = Color.FromHex("#f9d667");
                 btnDelay.Text = iDelay + " phút";
             }
+
+
+            return;
+
             response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=getAlarm2&board=" + G.boardSelect.name + "&users=" + G.User + "&name=" + name );
             responseString = await response.Content.ReadAsStringAsync();
 
@@ -229,8 +242,10 @@ namespace BeeSmart.Views
                 RowDefinition row = new RowDefinition();
                 row.Height = 60;
                 gridIO.RowDefinitions.Add(row);
-                if(G.boardSelect.GPIOs.FindIndex(a=>a== gpioSelect)==-1)
-                gpioSelect = G.boardSelect.GPIOs[0];
+                if (G.boardSelect.GPIOs.FindIndex(a => a == gpioSelect) == -1)
+                {
+                    gpioSelect = G.boardSelect.GPIOs[0];
+                }
                 foreach (GPIO gpio in G.boardSelect.GPIOs)
                 {
                     Color cl = Color.FromHex("#6e6e6e");
@@ -278,7 +293,7 @@ namespace BeeSmart.Views
                     imgBtn.Clicked += ImgBtn_Clicked;
 
 
-                    listBtnGPIOs.Add(new ListBtnGPIO(G.boardSelect.name, gpio.name, imgBtn));
+                    listBtnGPIOs.Add(new ListBtnGPIO(G.boardSelect.Mac, G.boardSelect.name, gpio.name, imgBtn));
 
                     Grid.SetRow(imgBtn, 0);
                     Grid.SetColumn(imgBtn, col2);
@@ -298,6 +313,7 @@ namespace BeeSmart.Views
                     Type = gpios[indexGPIO].type;
                     int state = gpios[indexGPIO].state;
                     gpioSelect = gpios[indexGPIO];
+                    
                 }
             }
          else
@@ -368,6 +384,7 @@ namespace BeeSmart.Views
             Type = gpios[indexGPIO].type;
             int state = gpios[indexGPIO].state;
             gpioSelect = gpios[indexGPIO];
+            gpioSelect.idx = indexGPIO;
             name = gpioSelect.name;
             LoadAlarm();
         }
@@ -449,7 +466,7 @@ namespace BeeSmart.Views
         }
         List<bool> listDay = new List<bool>()
         {
-            true,true,true,true,true,true,true
+            false,false,false,false,false,false,false
         };
         private void btn2_Clicked(object sender, EventArgs e)
         {
@@ -534,55 +551,167 @@ namespace BeeSmart.Views
 
         private async void btnApply_Clicked(object sender, EventArgs e)
         {
-         
-             
-               
-                    gpioSelect.sAlarm = "";
-                    foreach(bool s1 in listDay)
-                    {
-                        gpioSelect.sAlarm += s1 + "_";
-                    }
-                    gpioSelect.sAlarm += Environment.NewLine;
-                    if (listHourOn.Count == 0)
-                        gpioSelect.sAlarm += "_";
-                    foreach (string s2 in listHourOn)
-                    {
-                        gpioSelect.sAlarm += s2 + "_";
-                    }
-                    gpioSelect.sAlarm += Environment.NewLine;
-                    if (listHourOff.Count == 0)
-                        gpioSelect.sAlarm += "_";
-                    foreach (string s3 in listHourOff)
-                    {
-                        gpioSelect.sAlarm += s3 + "_";
-                    }
-                    gpioSelect.sAlarm += Environment.NewLine;
+
             var responseString2 = "";
-            if (iDelay > 0)
+
+            if (iDelay != gpioSelect.iDelay)
             {
-                String s = "https://giacongpcb.vn/esp-outputs-action.php?action=output_status2&name=" + gpioSelect.name + "&board=" + G.boardSelect.name + "&users=" + G.User + "&state=1";
+
+
+                var response = await client.GetAsync("http://giacongpcb.vn/beehome/action.php?action=getControlsDelays&board=" + G.boardSelect.Mac + "&users=" + G.User);
+                responseString2 = await response.Content.ReadAsStringAsync();
+
+                responseString2 = responseString2.Replace("\"", "");
+                responseString2 = responseString2.Replace("{", "");
+                responseString2 = responseString2.Replace("}", "");
+                String[] S4 = responseString2.Split(';');
+
+
+                int state = 0;
+                string type = gpioSelect.type;
+                if (iDelay != 0)
+                {
+                    if (type.Trim().Contains("key"))
+                    {
+                        state++;
+                        if (state > 3) state = 1;
+
+                    }
+
+                    else
+                    {
+                        if (state == 0) state = 1;
+                        else state = 0;
+                        if (type.Trim().Contains("door") || type.Trim().Contains("click")) state = 1;
+                        if (type.Trim().Contains("nc")) state = 0;
+                    }
+                }
+                gpioSelect.state = state;
+                G.boardSelect.GPIOs[gpioSelect.idx].state = state;
+                string states = "";
+                string delays = "";
+                for (int i = 0; i < G.boardSelect.GPIOs.Count; i++)
+                {
+                    states += G.boardSelect.GPIOs[i].state.ToString() + ";";
+                    if (i == gpioSelect.idx)
+                        delays += Convert.ToString(iDelay) + ";";
+                    else delays += S4[i] + ";";
+                }
+
+
+
+
+                //String s = "https://giacongpcb.vn/esp-outputs-action.php?action=output_status2&name=" + gpioSelect.name + "&board=" + G.boardSelect.name + "&users=" + G.User + "&state=1";
+                string s = "http://giacongpcb.vn/beehome/action.php?action=set_Controls&board=" + gpioSelect.Mac + "&States=" + states + "&Delays=" + delays + "&users=" + G.User;
                 var response2 = await client.GetAsync(s);
 
 
-                 responseString2 = await response2.Content.ReadAsStringAsync();
+                responseString2 = await response2.Content.ReadAsStringAsync();
             }
-                if (responseString2 != "null")
+
+
+            //check set alarm
+            bool isAlarm = false;
+            for (int i = 0; i < listDay.Count; i++)
+            {
+                if (listDay[i] == true)
                 {
-
-                    var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=updateAlarm&board=" + G.boardSelect.name + "&users=" + G.User + "&name=" + name + "&alarm=" + gpioSelect.sAlarm + "&Delay=" + iDelay);
-
-                    var responseString = await response.Content.ReadAsStringAsync();
-                    if (responseString.Length > 0)
-                    {
-                        await DisplayAlert("Thông báo", responseString, "OK");
-                    }
-                    LoadPara();
-                    G.history.LoadIO();
+                    isAlarm = true;
+                    break;
                 }
-                else
+            }
+
+            //list ngày
+            if (isAlarm)
+            {
+                gpioSelect.sAlarm = "";
+                foreach (bool s1 in listDay)
                 {
-                    await DisplayAlert("Lỗi", "Thử lại", "OK");
-                }    
+                    gpioSelect.sAlarm += s1 + "_";
+                }
+                gpioSelect.sAlarm += Environment.NewLine;
+                if (listHourOn.Count == 0)
+                    gpioSelect.sAlarm += "_";
+                foreach (string s2 in listHourOn)
+                {
+                    gpioSelect.sAlarm += s2 + "_";
+                }
+                gpioSelect.sAlarm += Environment.NewLine;
+                if (listHourOff.Count == 0)
+                    gpioSelect.sAlarm += "_";
+                foreach (string s3 in listHourOff)
+                {
+                    gpioSelect.sAlarm += s3 + "_";
+                }
+                gpioSelect.sAlarm += Environment.NewLine;
+
+
+                var response = await client.GetAsync("http://giacongpcb.vn/beehome/action.php?action=getControlsEvents&board=" + G.boardSelect.Mac + "&users=" + G.User);
+                responseString2 = await response.Content.ReadAsStringAsync();
+
+                responseString2 = responseString2.Replace("\"", "");
+                responseString2 = responseString2.Replace("{", "");
+                responseString2 = responseString2.Replace("}", "");
+                String[] S4 = responseString2.Split(';');
+
+                //check tung event -> event availabal -> changed;
+                int inAlarm = -1;
+                List<String> S5 = new List<String>();
+                for (int i = 0; i < S4.Length; i++)
+                {
+                    if (S4[i] == "") S5.Add(S4[i]);
+                }
+
+                if (S5 != null)
+                {
+                    for (int i = 0; i < S5.Count; i++)
+                    {
+                        if (!string.IsNullOrEmpty(S5[0]))
+                        {
+                            String[] S6 = S5[i].Split('_');
+                            if (S6.Count() > 2)
+                            {
+                                if (!string.IsNullOrEmpty(S6[0]) && !string.IsNullOrEmpty(S6[1]))
+                                {
+                                    if ((Convert.ToInt32(S6[0]) == 1) && (Convert.ToInt32(S6[1]) == gpioSelect.idx))
+                                    {
+                                        inAlarm = i;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+
+                if (inAlarm > -1)
+                {
+
+                }
+
+                /*
+                var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=updateAlarm&board=" + G.boardSelect.name + "&users=" + G.User + "&name=" + name + "&alarm=" + gpioSelect.sAlarm + "&Delay=" + iDelay);
+
+                var responseString = await response.Content.ReadAsStringAsync();
+                */
+                /*
+                if (responseString.Length > 0)
+                {
+                    await DisplayAlert("Thông báo", responseString, "OK");
+                }*/
+                
+
+            }
+
+            LoadPara();
+            G.history.LoadIO();
+
+            
+            /*else
+            {
+                await DisplayAlert("Lỗi", "Thử lại", "OK");
+            }*/
 
 
 

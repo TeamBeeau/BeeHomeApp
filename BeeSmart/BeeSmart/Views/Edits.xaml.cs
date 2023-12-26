@@ -162,7 +162,7 @@ namespace BeeSmart.Views
                 imgBtn.Clicked += ImgBtn_Clicked;
                
                 
-                listBtnGPIOs.Add(new ListBtnGPIO(G.boardSelect.name, gpio.name, imgBtn));
+                listBtnGPIOs.Add(new ListBtnGPIO(G.boardSelect.Mac, G.boardSelect.name, gpio.name, imgBtn));
 
                 Grid.SetRow(imgBtn, 0);
                 Grid.SetColumn(imgBtn, col2);
@@ -253,12 +253,24 @@ namespace BeeSmart.Views
             var choice = await DisplayAlert("Thay đổi ngõ ra", "Bạn muốn thay đổi", "YES", "NO");
             if (choice)
             {
-              
-                var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=updateGPIO&board=" + G.boardSelect.name + "&users=" + G.User + "&nameOld=" + nameOld + "&name=" + editName.Text.Trim() + "&type=" + Type);
-                String responseString = await response.Content.ReadAsStringAsync();
-                 G.boardSelect.GPIOs[G.boardSelect.GPIOs.FindIndex(a => a.name == gpioSelect.name)].type = Type;
+
+                //var response = await client.GetAsync("https://giacongpcb.vn/esp-outputs-action.php?action=updateGPIO&board=" + G.boardSelect.name + "&users=" + G.User + "&nameOld=" + nameOld + "&name=" + editName.Text.Trim() + "&type=" + Type);
+                //String responseString = await response.Content.ReadAsStringAsync();
+                
+                
+                
+                G.boardSelect.GPIOs[G.boardSelect.GPIOs.FindIndex(a => a.name == gpioSelect.name)].type = Type;
                 G.boardSelect.GPIOs[G.boardSelect.GPIOs.FindIndex(a => a.name == gpioSelect.name)].name = editName.Text ;
-               
+
+                String types = "", names = "";
+                for (int i = 0; i < G.boardSelect.GPIOs.Count; i++)
+                {
+                    names += G.boardSelect.GPIOs[i].name + ";";
+                    types += G.boardSelect.GPIOs[i].type + ";";
+                }
+
+                var response = await client.GetAsync("http://giacongpcb.vn/beehome/action.php?action=updateGPIO&board=" + G.boardSelect.Mac + "&users=" + G.User + "&name=" + names + "&type="  + types);
+                String responseString = await response.Content.ReadAsStringAsync();
                 if (responseString.Length > 0)
                 {
                     await DisplayAlert("Thông báo", responseString, "OK");
